@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 from pathlib import Path
+import platform
 
 
 COMPILER_OPTIONS = ["-target", "11"]
@@ -36,7 +37,17 @@ def java_compile(src_path: Path, jar_path: Path):
         outdir = Path(out).resolve()
         compiler = ToolProvider.getSystemJavaCompiler()
         fman = compiler.getStandardFileManager(None, None, None)
-        cp = [JPath @ (Path(p)) for p in System.getProperty("java.class.path").split(';')]
+        
+        # get delimeter for java.class.path
+        system = platform.system().upper()
+        if system == "WINDOWS":
+            class_delimeter = ";"
+        elif system == "DARWIN" or system == "LINUX":
+            class_delimeter = ":"
+        else:
+            # unknown
+            class_delimeter = ":"
+        cp = [JPath @ (Path(p)) for p in System.getProperty("java.class.path").split(class_delimeter)]
         fman.setLocationFromPaths(StandardLocation.CLASS_PATH, cp)
         if src_path.is_dir():
             fman.setLocationFromPaths(StandardLocation.SOURCE_PATH, [JPath @ (src_path.resolve())])
